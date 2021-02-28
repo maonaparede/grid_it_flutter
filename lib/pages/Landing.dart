@@ -47,10 +47,7 @@ class Landing extends State<MyHomePage> {
                     },
                     child: Text('Strike back !'),
                   ),
-                  CustomPaint(
-                    size: Size(100 , 100),
-                    painter: MyPainter(image)
-                  )
+
 
                 ],
 

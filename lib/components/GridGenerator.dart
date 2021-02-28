@@ -12,16 +12,29 @@ import 'package:flutter/rendering.dart';
 class MyPainter extends CustomPainter{
 
 
-  final ui.Image image;
+  final double imageH;
+  final double imageW;
 
-  MyPainter(this.image);
+  MyPainter(this.imageH, this.imageW);
 
   @override
   void paint(Canvas canvas, Size size) {
-    
-    canvas.drawImage(image, Offset.zero, Paint());
-    canvas.drawLine(Offset.zero, Offset( image.width as double , 0), Paint());
+    double pixInterval = 20;
 
+
+      canvas.drawImage(image, offset, Paint());
+      canvas.drawLine(Offset(100, 50), Offset(50 , 200), Paint());
+/*
+
+      for (int i = 0; i < imageH / pixInterval; i++) {
+        canvas.drawLine(Offset(0, i * pixInterval), Offset( imageW, i * pixInterval), Paint());
+      }
+      // draw vertical lines
+      for (int i = 0; i < imageW / pixInterval; i++) {
+        canvas.drawLine(Offset(i * pixInterval, 0),Offset(i * pixInterval, imageH), Paint());
+      }
+
+ */
 
 
   }

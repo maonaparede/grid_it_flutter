@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grid_it_flutter/components/GridGenerator.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
@@ -66,7 +67,14 @@ class ImageCrop extends State<CropPage> {
                 child: Transform(
                 alignment: FractionalOffset.center,
                 transform: Matrix4.diagonal3(Vector3(_scale, _scale, _scale)),
-                child: imageFile != null ? Image.file(imageFile) : Container(),
+                child:
+                   Stack(
+                  children: <Widget>[
+                  Center(
+                      child: imageFile != null ? _imageExist() : Container(),
+                  ),
+                    ],
+                  ),
                 )
                   ,)
                   ,)
@@ -134,15 +142,20 @@ class ImageCrop extends State<CropPage> {
     }
   }
 
-  Widget _buildButtonIcon() {
-    if (state == AppState.free)
-    return Icon(Icons.add);
-    else if (state == AppState.picked)
-    return Icon(Icons.crop);
-    else if (state == AppState.cropped)
-    return Icon(Icons.clear);
-    else
-    return Container();
+  Widget _imageExist() {
+    return Stack(
+      children: <Widget>[
+        Center(
+        child: Image.file(imageFile),
+        ),
+        CustomPaint(
+
+
+          size: Size.infinite,
+          painter: MyPainter(Image.file(imageFile).height , Image.file(imageFile).width),
+        ),
+      ],
+    );
   }
 
   Future<Null> _pickImage() async {
