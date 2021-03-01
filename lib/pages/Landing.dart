@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import 'package:grid_it_flutter/components/GridGenerator.dart';
-import 'package:grid_it_flutter/components/ImageEdit.dart';
 import 'package:image_picker/image_picker.dart';
 
 
@@ -45,7 +43,7 @@ class Landing extends State<MyHomePage> {
                     onPressed: () {
                       Navigator.pushNamed(context, '/crop');
                     },
-                    child: Text('Strike back !'),
+                    child: Text('Strike back!'),
                   ),
 
 

@@ -1,14 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:grid_it_flutter/pages/gridP.dart';
 import 'pages/ImageCrop.dart';
 import 'package:grid_it_flutter/pages/Landing.dart';
 
 
-import 'components/ImageEdit.dart';
-
-
-
+/*
+Proxima att:
+  dá pra usar o CustomPaperGridImg  pra renderizar img com qualidade total
+  colocar tela de aguardo quandoo salva grid,
+  mudar cor dos icones/ mesma cor da grade,
+  travar a tela em portrait screen,
+  nome aleatório na hr de salvar,
+  organizar os códigos
+ */
 
 void main() {
   runApp(MyApp());
@@ -25,9 +29,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/': (context) => MyHomePage(title: 'Flutter Demo Home Page'),
-        '/crop': (context) => CropPage(),
-        //'/edit': (context) => ImageEditor(),
-        '/grid': (context) => GridTileDemo(),
+        '/crop': (context) => CropPage()
       },
 
       title: 'Flutter Demo',
@@ -53,15 +55,5 @@ class CropPage extends StatefulWidget{
 
   @override
   ImageCrop createState() => ImageCrop();
-}
-
-class ImageEditor extends StatefulWidget{
-  @override
-  ImageEdit createState() => ImageEdit();
-}
-
-class GridTileDemo extends StatefulWidget {
-  @override
-  createState() => GridTitle();
 }
 

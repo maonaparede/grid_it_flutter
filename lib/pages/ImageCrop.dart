@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:grid_it_flutter/components/GridGenerator.dart';
+import 'package:flutter/rendering.dart';
+import 'package:grid_it_flutter/components/CustomPaperGrid.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import '../components/AssetsIcon.dart' as asset;
 import 'dart:ui' as ui;
@@ -20,12 +23,17 @@ enum AppState {
 
 class ImageCrop extends State<CropPage> {
 
+  GlobalKey globalKey = GlobalKey();
   AppState state;
   File imageFile;
   ui.Image image;
   double _scale = 1.0;
   double _previousScale = 1.0;
-  double _currentSliderValue = 25;
+  Offset _move = Offset(0.0, 0.0);
+  double _currentSliderValue = 110;
+  int pickerColors = 0;
+  Color _pickerColor = Colors.red;
+
 
 
   @override
@@ -36,6 +44,8 @@ class ImageCrop extends State<CropPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ScrollController _scrollControler =  ScrollController();
+
   return Scaffold(
       appBar: AppBar(
       title: Text('salve'),
@@ -48,22 +58,23 @@ class ImageCrop extends State<CropPage> {
             height: 540,
             color: Colors.red,
           child: GestureDetector(
-            onScaleStart: (ScaleStartDetails details) {
-            _previousScale = _scale;
-            setState(() {});
-            },
-            onScaleUpdate: (ScaleUpdateDetails details) {
-            _scale = _previousScale * details.scale;
-            setState(() {});
-            },
-            onScaleEnd: (ScaleEndDetails details) {
-            print(details);
+              onScaleStart: (ScaleStartDetails details) {
+              _previousScale = _scale;
+              setState(() {});
+              },
+              onScaleUpdate: (ScaleUpdateDetails details) {
+              _scale = _previousScale * details.scale;
+              setState(() {});
+              },
+              onScaleEnd: (ScaleEndDetails details) {
+              print(details);
 
-            _previousScale = 1.0;
-            setState(() {});
-            },
-                child: RotatedBox(
-                quarterTurns: 0,
+              _previousScale = 1.0;
+              setState(() {});
+              },
+
+                child: Transform.translate(
+                offset: _move,
                 child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Transform(
@@ -73,7 +84,7 @@ class ImageCrop extends State<CropPage> {
                    Stack(
                   children: <Widget>[
                   Center(
-                      child: imageFile != null ? _imageExist() : Container(),
+                      child: imageFile != null ? _renderImage(Image.file(imageFile)) : Container(),
                   ),
                     ],
                   ),
@@ -82,21 +93,27 @@ class ImageCrop extends State<CropPage> {
                   ,)
           ),
           ),
-              Container(
-                height: 63,
-                color: Colors.black26,
+              Expanded(
+
               child: Padding(
-                padding: EdgeInsets.fromLTRB(1.0 , 0.0 , 1.0 , 0.0),
+                padding: EdgeInsets.fromLTRB(1.0 , 0.0 , 1.0 , 3.0),
                   child:
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      Scrollbar(
+                        isAlwaysShown: true,
+                        controller: _scrollControler,
+
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    controller: _scrollControler,
                     children: [
                       IconButton(icon: asset.photo,
-                          onPressed: (){pickImageFunction();}),
+                          onPressed: (){
+                        _pickImage();
+                      }),
                       IconButton(icon: asset.crop, onPressed:(){cropImageFunction();}),
                     Slider(
                       value: _currentSliderValue,
-                      min: 0,
+                      min: 40,
                       max: 200,
                       divisions: 10,
                       label: _currentSliderValue.round().toString(),
@@ -106,11 +123,19 @@ class ImageCrop extends State<CropPage> {
                         });
                       },
                     ),
-                      IconButton(icon: asset.brush, onPressed: null),
-                      IconButton(icon: asset.save, onPressed: null),
+                      IconButton(icon: asset.brush, onPressed: (){changeColor();}),
+                      IconButton(icon: asset.save, onPressed: () {
+                        setState(() {
+                          if (imageFile != null) {
+                            _save();
+                          }
+                        }
+                        );
+                      }),
                     ],
 
-                  )
+                  ),
+                      )
               ),
               )
             ]
@@ -118,7 +143,7 @@ class ImageCrop extends State<CropPage> {
       ),
       ),
 
-       /*
+/*
        floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.deepOrange,
           onPressed: () {
@@ -130,12 +155,21 @@ class ImageCrop extends State<CropPage> {
           },
           child: _buildButtonIcon(),
         ) ,
-        */
+
+ */
+
   );
   }
 
-  pickImageFunction(){
-      _pickImage();
+  Widget _buildButtonIcon() {
+    if (state == AppState.free)
+      return Icon(Icons.add);
+    else if (state == AppState.picked)
+      return Icon(Icons.crop);
+    else if (state == AppState.cropped)
+      return Icon(Icons.clear);
+    else
+      return Container();
   }
 
   cropImageFunction(){
@@ -144,18 +178,21 @@ class ImageCrop extends State<CropPage> {
     }
   }
 
-  Widget _imageExist() {
-    loadImage(imageFile);
+  Widget _renderImage(Image image) {
 
-    return Stack(
-      children: <Widget>[
-       // Center(child: Image.file(imageFile),),
-        CustomPaint(
-          size: Size.infinite,
-          painter: MyPainter(image),
-        ),
-      ],
-    );
+    return
+      RepaintBoundary(
+        key: globalKey,
+        child: GridPaperCustom(
+          interval: _currentSliderValue,
+          strokeWidth: 2,
+          color: _pickerColor,
+          divisions: 2,
+          subdivisions: 1,
+
+          child: image,
+        )
+      );
   }
 
   Future<ui.Image> loadImage(File file)async{
@@ -165,11 +202,13 @@ class ImageCrop extends State<CropPage> {
   }
   
   Future<Null> _pickImage() async {
-  imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
-  if (imageFile != null) {
+  PickedFile imageFile1 = await ImagePicker().getImage(source: ImageSource.gallery);
+  if (imageFile1 != null) {
   setState(() {
   state = AppState.picked;
-  });
+  imageFile = File(imageFile1.path);
+  }
+  );
   }
   }
 
@@ -218,5 +257,50 @@ class ImageCrop extends State<CropPage> {
   });
   }
 
+
+// ValueChanged<Color> callback
+  void changeColor() {
+
+    switch(pickerColors){
+      case 1:
+        _pickerColor = Colors.white70;
+        break;
+      case 2:
+        _pickerColor = Colors.blue;
+        break;
+      case 3:
+        _pickerColor = Colors.pinkAccent;
+        break;
+      case 4:
+        _pickerColor = Colors.black26;
+        break;
+      default:
+        _pickerColor = Colors.orangeAccent;
+        pickerColors = 0;
+    }
+    pickerColors++;
+
+    setState(() => _pickerColor);
+  }
+
+  Future<void> _save() async {
+    RenderRepaintBoundary boundary =
+    globalKey.currentContext.findRenderObject();
+    ui.Image image = await boundary.toImage();
+    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    Uint8List pngBytes = byteData.buffer.asUint8List();
+
+    await Permission.storage.request();
+
+    //Request permissions if not already granted
+    if (!(await Permission.storage.status.isGranted))
+      await Permission.storage.request();
+
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(pngBytes),
+        quality: 100,
+        name: "canvas_image");
+    print(result);
+  }
 
   }
