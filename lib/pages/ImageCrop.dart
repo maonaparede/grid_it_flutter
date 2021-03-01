@@ -8,6 +8,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import '../components/AssetsIcon.dart' as asset;
+import 'dart:ui' as ui;
 import '../main.dart';
 
 
@@ -21,6 +22,7 @@ class ImageCrop extends State<CropPage> {
 
   AppState state;
   File imageFile;
+  ui.Image image;
   double _scale = 1.0;
   double _previousScale = 1.0;
   double _currentSliderValue = 25;
@@ -143,21 +145,25 @@ class ImageCrop extends State<CropPage> {
   }
 
   Widget _imageExist() {
+    loadImage(imageFile);
+
     return Stack(
       children: <Widget>[
-        Center(
-        child: Image.file(imageFile),
-        ),
+       // Center(child: Image.file(imageFile),),
         CustomPaint(
-
-
           size: Size.infinite,
-          painter: MyPainter(Image.file(imageFile).height , Image.file(imageFile).width),
+          painter: MyPainter(image),
         ),
       ],
     );
   }
 
+  Future<ui.Image> loadImage(File file)async{
+    final data = await file.readAsBytes();
+    image = await decodeImageFromList(data);
+    return image;
+  }
+  
   Future<Null> _pickImage() async {
   imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
   if (imageFile != null) {

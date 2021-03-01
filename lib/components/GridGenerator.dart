@@ -12,19 +12,24 @@ import 'package:flutter/rendering.dart';
 class MyPainter extends CustomPainter{
 
 
-  final double imageH;
-  final double imageW;
+  final ui.Image file;
 
-  MyPainter(this.imageH, this.imageW);
+  MyPainter(this.file);
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(ui.Canvas canvas, ui.Size size) {
     double pixInterval = 20;
 
+ 
+     // ui.Image img = loadImg(file);
+    
+      double imageH = 1500;
+      double imageW = 500;
 
-      canvas.drawImage(image, offset, Paint());
-      canvas.drawLine(Offset(100, 50), Offset(50 , 200), Paint());
-/*
+
+    canvas.drawImage(file, Offset.zero, Paint());
+      //canvas.drawLine(Offset(100, 50), Offset(50 , 200), Paint()..strokeWidth = 200);
+
 
       for (int i = 0; i < imageH / pixInterval; i++) {
         canvas.drawLine(Offset(0, i * pixInterval), Offset( imageW, i * pixInterval), Paint());
@@ -33,11 +38,12 @@ class MyPainter extends CustomPainter{
       for (int i = 0; i < imageW / pixInterval; i++) {
         canvas.drawLine(Offset(i * pixInterval, 0),Offset(i * pixInterval, imageH), Paint());
       }
-
- */
+      
 
 
   }
+
+
 
 
 
@@ -46,9 +52,6 @@ class MyPainter extends CustomPainter{
     return true;
   }
 
-  Future<ui.Image> loadImage(File file)async{
-    final data = await file.readAsBytes();
-    return await decodeImageFromList(data);
-  }
+
 
 }

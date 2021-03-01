@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:grid_it_flutter/pages/gridP.dart';
 import 'pages/ImageCrop.dart';
 import 'package:grid_it_flutter/pages/Landing.dart';
 
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => MyHomePage(title: 'Flutter Demo Home Page'),
         '/crop': (context) => CropPage(),
-        '/edit': (context) => ImageEditor(),
+        //'/edit': (context) => ImageEditor(),
+        '/grid': (context) => GridTileDemo(),
       },
 
       title: 'Flutter Demo',
@@ -56,5 +58,10 @@ class CropPage extends StatefulWidget{
 class ImageEditor extends StatefulWidget{
   @override
   ImageEdit createState() => ImageEdit();
+}
+
+class GridTileDemo extends StatefulWidget {
+  @override
+  createState() => GridTitle();
 }
 
